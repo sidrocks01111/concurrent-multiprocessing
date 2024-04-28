@@ -1,0 +1,1 @@
+This application implements web scrapers and database workers using multiprocessing and multithreading

@@ -1,0 +1,31 @@
+queues:
+  - name: SymbolQueue
+    description: contains symbols to be scaped from yahoo finance
+
+  - name: MongoUploading
+    description: contains data that needs to be uploaded to mongo
+
+workers:
+  - name: WikiWorker
+    description: THis scraps raw wikipedia page and pulls out symbols
+    location: workers.wikiWorker
+    class: WikiWorkerMasterScheduler
+    instance: 1 # here instance should only be 1 as it will create duplicate
+    input_values:
+      - 'https://en.wikipedia.org/wiki/List_of_S%26P_500_companies'
+    output_queue: SymbolQueue
+
+  - name: YahooFinWorker
+    description: pulls price data for a specific stock symbol from yahoo finance
+    location: workers.yahooFinWorker
+    class: YahooFinancePriceScheduler
+    instances: 3
+    input_queue: SymbolQueue
+    output_queue: MongoUploading
+
+  - name: MongoWorker
+    description: MongoWorker
+    location: workers.mongoWorker
+    class: MongoMasterScheduler
+    instances: 4
+    input_queue: MongoUploading        
